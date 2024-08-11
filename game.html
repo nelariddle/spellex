@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spelling Game</title>
+    <link rel="stylesheet" href="styles.css" />
+    <!-- Link to the CSS file -->
+  </head>
+  <body>
+    <h1>
+      <a href="index.html" style="text-decoration: none; color: inherit"
+        >Spelling Game</a
+      >
+    </h1>
+    <p id="wordIndex"></p>
+
+    <button id="playAudio">Play Word</button>
+    <input
+      type="text"
+      id="inputWord"
+      placeholder="Type the word here"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <button id="checkWord">Check Spelling</button>
+    <button id="giveUp">Give Up</button>
+    <p id="result"></p>
+    <p id="currentWord"></p>
+
+    <script>
+      async function fetchWords() {
+        const response = await fetch("words.csv");
+        const text = await response.text();
+
+        // Split text into lines and handle potential header
+        const lines = text.split("\n").filter((line) => line.trim() !== "");
+        // If the first line is a header, uncomment the next line
+        // lines.shift();
+
+        return lines.map((row) => row.split(",")[0].trim()); // Assuming single-column CSV
+      }
+
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      async function initializeGame() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const startIndex = parseInt(urlParams.get("start"));
+        const endIndex = parseInt(urlParams.get("end"));
+        const randomize = urlParams.get("randomize") === "true";
+
+        const allWords = await fetchWords();
+        let words = allWords.slice(startIndex, endIndex + 1);
+
+        if (randomize) {
+          words = shuffleArray(words);
+        }
+
+        let currentWordIndex = 0;
+
+        const playAudio = () => {
+          if (words.length > 0) {
+            let audio = new Audio(`audio/${words[currentWordIndex]}.mp3`);
+            audio.play();
+          }
+        };
+
+        const checkSpelling = () => {
+          let userWord = document.getElementById("inputWord").value;
+          if (userWord === words[currentWordIndex]) {
+            document.getElementById("result").innerText = "Correct!";
+            document.getElementById("inputWord").value = ""; // Clear input field
+            currentWordIndex = (currentWordIndex + 1) % words.length;
+            updateIndex();
+            playAudio();
+          } else {
+            document.getElementById("result").innerText = "Try again!";
+          }
+        };
+
+        const giveUp = () => {
+          document.getElementById(
+            "result"
+          ).innerText = `The word was "${words[currentWordIndex]}"`;
+          document.getElementById("inputWord").value = ""; // Clear input field
+          currentWordIndex = (currentWordIndex + 1) % words.length;
+          updateIndex();
+          playAudio();
+        };
+
+        const updateIndex = () => {
+          document.getElementById("wordIndex").innerText = `Word ${
+            currentWordIndex + 1
+          } of ${words.length}`;
+        };
+
+        document
+          .getElementById("playAudio")
+          .addEventListener("click", playAudio);
+        document
+          .getElementById("checkWord")
+          .addEventListener("click", checkSpelling);
+        document.getElementById("giveUp").addEventListener("click", giveUp);
+
+        document
+          .getElementById("inputWord")
+          .addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault(); // Prevent form submission if inside a form
+              checkSpelling();
+            }
+          });
+        playAudio();
+
+        updateIndex();
+      }
+      initializeGame();
+    </script>
+  </body>
+</html>

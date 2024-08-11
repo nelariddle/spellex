@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spelling Game Setup</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to the CSS file -->
+</head>
+<body>
+    <h1>Spelling Game Setup</h1>
+    <p>Select the range of words you want to be tested on (1 to 750):</p>
+    
+    <div class="form-group">
+        <label for="startIndex">Start:</label>
+        <input type="number" id="startIndex" min="1" max="750" value="1">
+    </div>
+
+    <div class="form-group">
+        <label for="endIndex">End:</label>
+        <input type="number" id="endIndex" min="1" max="750" value="750">
+    </div>
+
+    <div class="form-group">
+        <label for="randomize">Randomize Order:</label>
+        <input type="checkbox" id="randomize" name="randomize">
+    </div>
+
+    <button id="startGame">Start Game</button>
+
+    <script>
+        document.getElementById('startGame').addEventListener('click', () => {
+            const startIndex = parseInt(document.getElementById('startIndex').value) - 1;
+            const endIndex = parseInt(document.getElementById('endIndex').value) - 1;
+            const randomize = document.getElementById('randomize').checked;
+            if (startIndex >= 0 && endIndex >= startIndex && endIndex < 750) {
+                // Pass the selected indices to the game page
+                window.location.href = `game.html?start=${startIndex}&end=${endIndex}&randomize=${randomize}`;
+            } else {
+                alert('Please select a valid range.');
+            }
+        });
+    </script>
+</body>
+</html>
