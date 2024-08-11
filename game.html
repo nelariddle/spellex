@@ -16,6 +16,8 @@
     <p id="wordIndex"></p>
 
     <button id="playAudio">Play Word</button>
+    <p id="definition"></p>
+
     <input
       type="text"
       id="inputWord"
@@ -29,6 +31,11 @@
     <p id="currentWord"></p>
 
     <script>
+      async function fetchDefinitions() {
+        const response = await fetch("definitions.json");
+        return response.json();
+      }
+
       async function fetchWords() {
         const response = await fetch("words.csv");
         const text = await response.text();
@@ -54,7 +61,7 @@
         const startIndex = parseInt(urlParams.get("start"));
         const endIndex = parseInt(urlParams.get("end"));
         const randomize = urlParams.get("randomize") === "true";
-
+        const definitions = await fetchDefinitions();
         const allWords = await fetchWords();
         let words = allWords.slice(startIndex, endIndex + 1);
 
@@ -98,7 +105,14 @@
           document.getElementById("wordIndex").innerText = `Word ${
             currentWordIndex + 1
           } of ${words.length}`;
+          let word = words[currentWordIndex];
+        document.getElementById("definition").innerText = `${
+          definitions[word]["Definition"] || "No definition available"
+        }`;
         };
+
+        
+
 
         document
           .getElementById("playAudio")
